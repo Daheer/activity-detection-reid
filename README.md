@@ -8,6 +8,6 @@ python main.py
 ```
 
 Tweakable params
-- `match_threshold`
-- `model_threshold`
-- `iou_threshold`
+- `match_threshold`: reid model threshold
+- `model_threshold`: yolo detection confidence threshold
+- `iou_threshold`: yolo iou threshold
