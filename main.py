@@ -30,10 +30,6 @@ def run_tracking_pipeline(
     tracker = CustomTracker(match_threshold=match_threshold)
     trajectories = {}
 
-    trajectories = {}
-    last_active_frame = {}
-    frame_count = 0
-
     prev_centroids = {}
 
     zone_tracker = ZoneTracker()
@@ -74,6 +70,10 @@ def run_tracking_pipeline(
             tracker_detections.append({"box": [x1, y1, x2, y2], "embedding": embedding})
 
         tracked_detections = tracker.update(tracker_detections)
+
+        trajectories = {}
+        last_active_frame = {}
+        frame_count = 0
 
         active_ids = set()
         for det in tracked_detections:
