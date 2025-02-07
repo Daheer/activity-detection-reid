@@ -1,0 +1,15 @@
+torch
+torchvision
+rich==12.5.1
+opencv-python==4.6.0.66
+tqdm==4.64.1
+#git+https://github.com/tryolabs/norfair.git@master
+norfair[video]
+openvino>=2024.0.0
+seaborn
+requests
+pyyaml
+ipython
+numpy==1.23.5
+protobuf<4.21.3
+tensorboard>=2.4.1
