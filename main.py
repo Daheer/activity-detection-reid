@@ -142,13 +142,26 @@ def run_tracking_pipeline(
                     2,
                 )
 
+        max_alerts = 5  
         y0 = 30
-        for alert in alerts:
-            cv2.putText(
-                canvas, alert, (10, y0), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2
-            )
-            y0 += 25
-            print(alert)
+        padding = 5
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.6
+        thickness = 2
+        text_color = (0, 0, 255)
+        bg_color = (0, 0, 0)
+
+        for alert in alerts[-max_alerts:]:  # Show only the most recent alerts
+            (text_width, text_height), _ = cv2.getTextSize(alert, font, font_scale, thickness)
+            
+            overlay = canvas.copy()
+            cv2.rectangle(overlay, (10 - padding, y0 - text_height - padding),
+                        (10 + text_width + padding, y0 + padding),
+                        bg_color, -1)
+            cv2.addWeighted(overlay, 0.5, canvas, 0.5, 0, canvas)
+            
+            cv2.putText(canvas, alert, (10, y0), font, font_scale, text_color, thickness)
+            y0 += text_height + 2 * padding + 5
 
         out.write(canvas)
 
