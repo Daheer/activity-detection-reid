@@ -72,6 +72,11 @@ def check_line_crossing(
         return True, direction
     return False, ""
 
+@dataclass
+class TimedAlert:
+    message: str
+    start_frame: int
+    duration_frames: int  # How many frames this alert should persist
 
 class ZoneTracker:
     def __init__(self):
@@ -80,6 +85,24 @@ class ZoneTracker:
         self.alerted_entrance: Set[int] = set()
         self.alerted_exit: Set[int] = set()
         self.frame_count = 0
+
+        self.active_alerts: Deque[TimedAlert] = deque()
+        self.alert_duration_frames = 90 
+
+    def add_alert(self, message: str) -> None:
+        timed_alert = TimedAlert(
+            message=message,
+            start_frame=self.frame_count,
+            duration_frames=self.alert_duration_frames
+        )
+        self.active_alerts.append(timed_alert)
+
+    def get_active_alerts(self) -> List[str]:
+        # Remove expired alerts
+        while (self.active_alerts and 
+               self.frame_count - self.active_alerts[0].start_frame > self.active_alerts[0].duration_frames):
+            self.active_alerts.popleft()
+        return [alert.message for alert in self.active_alerts]
 
     def format_timestamp(self, frame_count: int, fps: float) -> str:
         total_seconds = frame_count / fps
@@ -120,6 +143,7 @@ class ZoneTracker:
                 alerts.append(
                     f"[{timestamp}] ALERT: Person {obj.id} left checkout zone"
                 )
+                self.add_alert(f"[{timestamp}] ALERT: Person {obj.id} entered checkout zone")
 
             crossed, direction = check_line_crossing(
                 current_points, past_points, line_points[0], line_points[1]
@@ -129,19 +153,22 @@ class ZoneTracker:
                     alerts.append(
                         f"[{timestamp}] ALERT: Person {obj.id} entered through entrance line"
                     )
+                    self.add_alert(f"[{timestamp}] ALERT: Person {obj.id} entered through entrance line")
                     self.alerted_entrance.add(obj.id)
                 elif direction == "exit" and obj.id not in self.alerted_exit:
                     if obj.id in self.has_visited_checkout:
                         alerts.append(
                             f"[{timestamp}] ALERT: Person {obj.id} exited after visiting checkout"
                         )
+                        self.add_alert(f"[{timestamp}] ALERT: Person {obj.id} entered checkout zone")
                     else:
                         alerts.append(
                             f"[{timestamp}] ALERT: Person {obj.id} exited WITHOUT visiting checkout"
                         )
+                        self.add_alert(f"[{timestamp}] ALERT: Person {obj.id} exited WITHOUT visiting checkout")
                     self.alerted_exit.add(obj.id)
         self.currently_in_checkout = currently_in_checkout
-        return alerts
+        return self.get_active_alerts()
 
 
 class DummyTrackedObject:
