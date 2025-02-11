@@ -47,7 +47,7 @@ class Model:
         result = self.compiled_model(input_data)[self.output_layer]
         return result
 
-extractor = Model(reid_model_path, batchsize=-1, device="AUTO")
+extractor = Model(reidentification_model_path, batchsize=-1, device="AUTO")
 
 def preprocess(frame, height, width):
     resized_image = cv2.resize(frame, (width, height))
